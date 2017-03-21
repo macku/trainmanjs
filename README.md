@@ -1,2 +1,3 @@
-# trainmanjs
-Trainman - Cross-Origin Communication Library
+# TrainmanJS
+
+Cross-Origin Communication Library

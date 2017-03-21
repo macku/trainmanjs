@@ -1,0 +1,50 @@
+{
+  "name": "trainmanjs",
+  "version": "0.1.0",
+  "description": "TrainmanJS - Cross-Origin Communication Library",
+  "main": "lib/trainmanjs.js",
+  "jsnext:main": "src/index.js",
+  "scripts": {
+    "build": "webpack",
+    "lint": "eslint src",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublish": "npm run lint && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/macku/trainmanjs.git"
+  },
+  "keywords": [
+    "trainman",
+    "events",
+    "cross",
+    "origin",
+    "postMessage",
+    "communication"
+  ],
+  "author": "Maciej Adamczak",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/macku/trainmanjs/issues"
+  },
+  "homepage": "https://github.com/macku/trainmanjs#readme",
+  "devDependencies": {
+    "babel-core": "^6.24.0",
+    "babel-loader": "^6.4.1",
+    "babel-plugin-transform-object-rest-spread": "^6.23.0",
+    "babel-preset-env": "^1.2.2",
+    "eslint": "^3.18.0",
+    "eslint-config-airbnb-base": "^11.1.1",
+    "eslint-config-standard": "^7.1.0",
+    "eslint-loader": "^1.6.3",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-require-path-exists": "^1.1.5",
+    "eslint-plugin-standard": "^2.1.1",
+    "webpack": "^2.2.1"
+  },
+  "engines": {
+    "node": ">=6.5",
+    "npm": ">=3.0.0"
+  }
+}
