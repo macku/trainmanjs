@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Passenger - First Frame</title>
+</head>
+<body>
+  <h1>I'm the Passenger</h1>
+  <h2>First Frame</h2>
+
+  <p>
+    <button id="make-parent-red">Make parent window red</button>
+  </p>
+
+  <script src="https://unpkg.com/trainmanjs"></script>
+  <script src="topics.js"></script>
+  <script>
+    (function(module) {
+      // 1. Initialize Passenger communication inside first frame
+      const Passenger = module.Passenger;
+      const passenger = new Passenger();
+
+      // 2. Listen to "change-color" topic and handle message
+      passenger.on(CHANGE_COLOR_TOPIC, (message) => {
+        const { data } = message;
+        const { color } = data;
+
+        document.documentElement.style.background = color;
+      });
+
+      // 3. Listen to "reset-color" topic and handle message
+      passenger.on(RESET_COLOR_TOPIC, () => {
+        document.documentElement.style.background = '';
+      });
+
+      // 4. Post "change-color" message to parent
+      document.getElementById('make-parent-red').addEventListener('click', () => {
+        const message = {
+          color: 'red'
+        };
+
+        passenger.post(CHANGE_COLOR_TOPIC, message)
+      });
+    })(trainmanjs);
+  </script>
+</body>
+</html>

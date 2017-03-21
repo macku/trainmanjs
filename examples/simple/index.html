@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Trainman - Simple example</title>
+</head>
+<body>
+  <h1>I'm the Trainman</h1>
+
+  <p>
+    <button id="make-frames-green">Make the frames green</button>
+  </p>
+
+  <p>
+    <button id="make-first-random">Set random color on the First frame</button>
+  </p>
+
+  <p>
+    <button id="make-second-random">Set random color on the Second frame</button>
+  </p>
+
+  <p>
+    <button id="reset-frames">Reset the frames colors</button>
+  </p>
+
+  <iframe id="first-frame"  src="first-frame.html"  frameborder="0" style="width: 500px; height: 200px; border: 1px solid black;"></iframe>
+  <iframe id="second-frame" src="second-frame.html" frameborder="0" style="width: 500px; height: 200px; border: 1px solid black;"></iframe>
+
+  <script src="https://unpkg.com/trainmanjs"></script>
+  <script src="topics.js"></script>
+  <script>
+    (function(module) {
+      // 1. Get the frames elements from the DOM
+      const firstFrameId = 'first-frame';
+      const firsFrame = document.getElementById(firstFrameId);
+      const secondFrameId = 'second-frame';
+      const secondFrame = document.getElementById(secondFrameId);
+
+      // 2. Initialize connection using Trainman
+      const Trainman = module.Trainman;
+      const trainman = new Trainman([
+        firsFrame, secondFrame
+      ]);
+
+      // 3. Listen to incoming "change-color" topic
+      const handleChangeTopic = (message) => {
+        const {data} = message;
+        const {color} = data;
+
+        document.documentElement.style.background = color;
+      };
+
+      trainman.on(firstFrameId, CHANGE_COLOR_TOPIC, handleChangeTopic);
+      trainman.on(secondFrameId, CHANGE_COLOR_TOPIC, handleChangeTopic);
+
+      // 4. Send "change-color" and "reset-colors" messages to all frames at once
+      document.getElementById('make-frames-green').addEventListener('click', () => {
+        const message = {
+          color: 'green'
+        };
+
+        trainman
+          .post(firstFrameId, CHANGE_COLOR_TOPIC, message)
+          .post(secondFrameId, CHANGE_COLOR_TOPIC, message);
+      });
+
+      document.getElementById('reset-frames').addEventListener('click', () => {
+        trainman
+          .post(firstFrameId, RESET_COLOR_TOPIC)
+          .post(secondFrameId, RESET_COLOR_TOPIC);
+
+        document.documentElement.style.background = '';
+      });
+
+      // 5. Send different "change-color" messages to each frame
+      const randomHexColor = () => {
+        const chars = '0123456789abcdef';
+        let color = '';
+
+        do {
+          color += chars[Math.floor(Math.random() * 16)];
+        }
+        while (color.length < 6);
+
+        return `#${color}`;
+      };
+
+      document.getElementById('make-first-random').addEventListener('click', () => {
+        const message = {
+          color: randomHexColor()
+        };
+
+        trainman.post(firstFrameId, CHANGE_COLOR_TOPIC, message)
+      });
+
+      document.getElementById('make-second-random').addEventListener('click', () => {
+        const message = {
+          color: randomHexColor()
+        };
+
+        trainman.post(secondFrameId, CHANGE_COLOR_TOPIC, message)
+      });
+    })(trainmanjs);
+  </script>
+</body>
+</html>
