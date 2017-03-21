@@ -10,6 +10,12 @@ wrapper for the native [`postMessage`](https://developer.mozilla.org/en-US/docs/
 
 It allows you to send bidirectional **Topics** and **Messages** between the **iframes** and wrapper (parent) window.
 
+[![Trainman](http://www.hotflick.net/flicks/2003_The_Matrix_Revolutions/fhd003TMR_Bruce_Spence_002.jpg)](http://matrix.wikia.com/wiki/The_Trainman)
+
+***The Trainman** is an exile who created and operates Mobil Avenue and is a servant of another exile program known as the Merovingian.*
+
+source: http://matrix.wikia.com/wiki/The_Trainman
+
 ## Features
 
  - Topics and messages
@@ -29,41 +35,48 @@ It allows you to send bidirectional **Topics** and **Messages** between the **if
    Reconnect with the child iframe even if it will reload itself. During the reconnection, Trainman will queue messages
    in his buffer. Queued messages will be delivered once the connection is established again.
    
-  - Bulk operation (upcoming)
+ - Bulk operation (upcoming)
    
-    Post a message to all child frames at once. Don't need to specify an exact recipient. You can use the **'*'** symbol
-    for sending a message to all of the connect children frames.
+   Post a message to all child frames at once. Don't need to specify an exact recipient. You can use the **'*'** symbol
+   for sending a message to all of the connect children frames.
     
-  - Log mode (upcoming)
+ - Log mode (upcoming)
   
-    Easily turn on and off logging mechanism. Thanks to that you debug your code and application in a much more simple
-    way.
+   Easily turn on and off logging mechanism. Thanks to that you can debug your code and application in a much more simple
+   way.
+
+ - F2F (upcoming)
+
+   Frame-to-frame direct communication. Allow to send and proxy messages directly between the child frames.
+
 
 ## How to install
 
-### NPM
+### NPM and Yarn
 
 You can install the library using **NPM**:
 
 ```bash
-npm install trainmanjs
+npm install trainmanjs -S
+// or
+yarn add trainmanjs
 ```
 
 Next, you can import **TrainmanJS** module into your app:
 
 ```js
-import Trainman from 'trainmnajs';
+import Trainman from 'trainmnanjs';
 ```
 
 For the child pages (frames) you should import **Passenger** class:
 
 ```js
-import { Passenger } from 'trainmnajs';
+import { Passenger } from 'trainmnanjs';
 ````
 
 ### Using CDN
 
-You can also use the **CDN** service ex. [unpkg.com](https://unpkgs.com) or [npm-cdn.herrokuapp.com](http://npm-cdn.herokuapp.com/trainmanjs@0.2.0/lib/trainmanjs.js)
+You can also use the **CDN** service ex. [unpkg.com](https://unpkg.com/trainmanjs@0.2.1) or [npm-cdn.herrokuapp.com](http://npm-cdn.herokuapp.com/trainmanjs@0.2.1/lib/trainmanjs.js)
 
 ```html
 <script src="https://unpkg.com/trainmanjs"></script>
@@ -88,5 +101,5 @@ TBA
 ## Examples
 
 ### Simple Example
-1. [Check simple example](https://cdn.rawgit.com/macku/trainmanjs/ba192230/examples/simple/index.html) how to use Trainman
-2. [Here you can find the source code](/examples/simple/) for the the above example
+1. [Check simple example](https://rawgit.com/macku/trainmanjs/master/examples/simple/index.html) how to use Trainman
+2. [Here you can find the source code](/examples/simple/) for the above example
