@@ -6,6 +6,8 @@ export const isClientConnected = client => Boolean(client.connected);
 
 export const getOrigin = () => window.location.origin;
 
+export const isHandshake = topic => topic === CONSTANTS.HANDSHAKE_TOPIC;
+
 export const isMatchingOrigin = (sourceOrigin) => {
   const hostOrigin = getOrigin();
   const isMatching = sourceOrigin === hostOrigin;
