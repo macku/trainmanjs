@@ -9,7 +9,7 @@
     "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublish": "npm run lint && npm run build",
-    "postpublich": "git push --tags"
+    "postpublish": "git push --tags"
   },
   "repository": {
     "type": "git",
