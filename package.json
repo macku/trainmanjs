@@ -2,14 +2,14 @@
   "name": "trainmanjs",
   "version": "0.2.3",
   "description": "TrainmanJS - Cross-Origin Communication Library",
-  "main": "lib/trainmanjs.js",
-  "jsnext:main": "src/index.js",
+  "main": "lib/trainmanjs",
+  "jsnext:main": "src/index",
   "scripts": {
     "build": "webpack",
     "lint": "eslint src",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublish": "npm run lint && npm run build",
-    "postpublish": "git push --tags"
+    "postpublish": "git push origin master --tags"
   },
   "repository": {
     "type": "git",
