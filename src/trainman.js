@@ -2,7 +2,7 @@ import * as CONSTANTS from './constants';
 import * as utils from './utils';
 
 class Trainman {
-  constructor(frames = [], config = CONSTANTS.DEFAULT_CONFIG) {
+  constructor(frame, config = CONSTANTS.DEFAULT_CONFIG) {
     this.config = { ...CONSTANTS.DEFAULT_CONFIG, ...config };
 
     this.intervals = {};
@@ -13,10 +13,12 @@ class Trainman {
     this.handleIncomingMessage = this.handleIncomingMessage.bind(this);
 
     this.addEventHandlers();
-    this.setClients(frames);
+
+    const frames = Array.isArray(frame) ? frame : [frame];
+    this.setClients(...frames);
   }
 
-  setClients(frames) {
+  setClients(...frames) {
     Array.from(frames).map(frame => this.setClient(frame));
   }
 
@@ -25,7 +27,8 @@ class Trainman {
       throw new TypeError('Given frame is not an instance of the Iframe interface', frame);
     }
 
-    const { src: targetOrigin, id: clientId } = frame;
+    const { src, id: clientId } = frame;
+    const targetOrigin = utils.getOriginFromUri(src);
     const sourceOrigin = utils.getOrigin();
 
     return {
@@ -62,13 +65,15 @@ class Trainman {
     }
 
     listeners.forEach((listener) => {
-      if (!utils.isMatchingOrigin(sourceOrigin)) {
+      const { targetOrigin, callback } = listener;
+
+      if (!utils.isMatchingOrigin(sourceOrigin, targetOrigin)) {
         return;
       }
 
       const message = { topic, source, sourceOrigin, data };
 
-      listener.callback(message);
+      callback(message);
     });
   }
 
@@ -79,10 +84,14 @@ class Trainman {
     frame.contentWindow.postMessage(message, targetOrigin);
   }
 
-  connectToClient(clientId) {
+  connectToClient(clientId, reconnect = false) {
     this.startHandshakePolling(clientId);
 
     this.on(clientId, CONSTANTS.BACK_HANDSHAKE_TOPIC, this.setClientAsConnected.bind(this, clientId));
+
+    if (!reconnect) {
+      this.on(clientId, CONSTANTS.CLIENT_DISCONNECTED_TOPIC, this.setClientAsDisconnected.bind(this, clientId));
+    }
   }
 
   startHandshakePolling(clientId) {
@@ -98,10 +107,16 @@ class Trainman {
     this.off(clientId, CONSTANTS.BACK_HANDSHAKE_TOPIC);
 
     const client = this.getClient(clientId);
-
     client.connected = true;
 
-    this.deliverClientQueuedMessaged(clientId);
+    this.deliverQueuedMessages(clientId);
+  }
+
+  setClientAsDisconnected(clientId) {
+    const client = this.getClient(clientId);
+    client.connected = false;
+
+    this.connectToClient(clientId, true);
   }
 
   addMessageToQueue(clientId, message) {
@@ -112,7 +127,7 @@ class Trainman {
     queue.push(message);
   }
 
-  deliverClientQueuedMessaged(clientId) {
+  deliverQueuedMessages(clientId) {
     const messages = this.queue[clientId];
 
     if (!Array.isArray(messages) || !messages.length) {
@@ -140,7 +155,6 @@ class Trainman {
     }
 
     const message = { clientId, topic, data };
-
     this.postMessage(message);
 
     return this;

@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Frame</title>
+</head>
+<body>
+<h2>My Frame</h2>
+
+<p>
+  Counter: <strong id="counter">(not set)</strong>
+</p>
+
+<p>
+  <button id="reload">Reload this frame</button>
+</p>
+
+<script src="https://unpkg.com/trainmanjs"></script>
+<script src="topics.js"></script>
+<script>
+  (function(module) {
+    const Passenger = module.Passenger;
+    const passenger = new Passenger();
+
+    let counter = 0;
+
+    passenger.on(COUNTER_TOPIC, () => {
+      counter++;
+
+      document.getElementById('counter').textContent = counter.toString();
+    });
+
+    const reloadButton = document.getElementById('reload');
+
+    reloadButton.addEventListener('click', () => {
+       location.reload();
+    });
+  })(trainmanjs);
+</script>
+</body>
+</html>
+
+
+</body>
+</html>

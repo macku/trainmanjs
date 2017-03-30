@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Trainman - Re-connection example</title>
+</head>
+<body>
+  <h1>Re-connection Example</h1>
+
+  <p>
+    Counter: <strong id="counter">(not set)</strong>
+  </p>
+
+  <p>
+    <button id="increase-counter">Increment counter by +1</button>
+  </p>
+
+  <iframe id="my-frame" src="http://localhost:1235/examples/reconnect/reloadable-frame.html"  frameborder="0" style="width: 500px; height: 200px; border: 1px solid black;"></iframe>
+
+  <script src="https://unpkg.com/trainmanjs"></script>
+  <script src="topics.js"></script>
+  <script>
+    (function(module) {
+      const myFrameId = 'my-frame';
+      const myFrame = document.getElementById(myFrameId);
+
+      let counter = 0;
+
+      const Trainman = module.Trainman;
+      const trainman = new Trainman(myFrame);
+
+      document.getElementById('increase-counter').addEventListener('click', () => {
+        counter++;
+
+        document.getElementById('counter').textContent = counter.toString();
+
+        trainman.post(myFrameId, COUNTER_TOPIC);
+      });
+    })(trainmanjs);
+  </script>
+</body>
+</html>

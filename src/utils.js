@@ -1,5 +1,7 @@
 import * as CONSTANTS from './constants';
 
+const HOST_REGEXP = /https?:\/\/[a-z0-9\-.:]+\/?/i;
+
 export const isElAnIframe = el => el instanceof CONSTANTS.IFRAME_INTERFACE;
 
 export const isClientConnected = client => Boolean(client.connected);
@@ -8,9 +10,14 @@ export const getOrigin = () => window.location.origin;
 
 export const isHandshake = topic => topic === CONSTANTS.HANDSHAKE_TOPIC;
 
-export const isMatchingOrigin = (sourceOrigin) => {
-  const hostOrigin = getOrigin();
-  const isMatching = sourceOrigin === hostOrigin;
+export const getOriginFromUri = uri => (
+  uri.match(HOST_REGEXP)
+    .pop()
+    .replace(/\/$/, '')
+);
+
+export const isMatchingOrigin = (targetOrigin, sourceOrigin) => {
+  const isMatching = targetOrigin === sourceOrigin;
 
   return isMatching;
 };

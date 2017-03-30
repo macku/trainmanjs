@@ -1,7 +1,6 @@
-[![version](https://badge.fury.io/js/trainmanjs.svg)](https://www.npmjs.com/package/trainmanjs)
+[![version](https://img.shields.io/npm/v/trainmanjs.svg)](https://www.npmjs.com/package/trainmanjs)
 [![dependencies](https://img.shields.io/david/macku/trainmanjs.svg)](package.json)
 [![dev dependencies](https://img.shields.io/david/dev/macku/trainmanjs.svg)](package.json)
-
 
 # TrainmanJS
 
@@ -30,10 +29,10 @@ source: http://matrix.wikia.com/wiki/The_Trainman
    You can send a message from the wrapper (parent) window to the child iframe even it's still loading.
    Queued messages will be delivered once the connection is established.
    
- - Reconnection (upcoming)
+ - Reconnection
  
-   Reconnect with the child iframe even if it will reload itself. During the reconnection, Trainman will queue messages
-   in his buffer. Queued messages will be delivered once the connection is established again.
+   When the child frame will reload itself, Trainman will try to reconnect with it. During the reconnection, Trainman
+   will queue messages inside his buffer. Queued messages will be delivered once the connection is established again.
    
  - Bulk operation (upcoming)
    
@@ -76,14 +75,14 @@ import { Passenger } from 'trainmnanjs';
 
 ### Using CDN
 
-You can also use the **CDN** service ex. [unpkg.com](https://unpkg.com/trainmanjs@0.2.1) or [npm-cdn.herrokuapp.com](http://npm-cdn.herokuapp.com/trainmanjs@0.2.1/lib/trainmanjs.js)
+You can also use the **CDN** service ex. [unpkg.com](https://unpkg.com/trainmanjs@0.3.0) or [npm-cdn.herrokuapp.com](http://npm-cdn.herokuapp.com/trainmanjs@0.3.0/lib/trainmanjs.js)
 
 ```html
 <script src="https://unpkg.com/trainmanjs"></script>
 
 <!-- or -->
 
-<script src="http://npm-cdn.herokuapp.com/trainmanjs@0.2.0/lib/trainmanjs.js"></script>
+<script src="http://npm-cdn.herokuapp.com/trainmanjs@0.3.0/lib/trainmanjs.js"></script>
 ```
 
 Then you can access the **Trainman** and **Passenger** from the injected module:
@@ -103,3 +102,7 @@ TBA
 ### Simple Example
 1. [Check simple example](https://rawgit.com/macku/trainmanjs/master/examples/simple/index.html) how to use Trainman
 2. [Here you can find the source code](/examples/simple/) for the above example
+
+### Re-connection
+1. [Reconnection example](https://rawgit.com/macku/trainmanjs/master/examples/reconnect/index.html)
+2. [Here you can find the source code](/examples/reconnect/) for the above example

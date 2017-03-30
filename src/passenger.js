@@ -8,6 +8,7 @@ class Passenger {
     this.queue = [];
 
     this.handleIncomingMessage = this.handleIncomingMessage.bind(this);
+    this.handleFrameUnload = this.handleFrameUnload.bind(this);
     this.setHostAsConnected = this.setHostAsConnected.bind(this);
 
     this.addEventHandlers();
@@ -16,6 +17,11 @@ class Passenger {
 
   addEventHandlers() {
     window.addEventListener(CONSTANTS.MESSAGE_EVENT_NAME, this.handleIncomingMessage);
+    window.addEventListener(CONSTANTS.UNLOAD_EVENT_NAME, this.handleFrameUnload);
+  }
+
+  handleFrameUnload() {
+    this.post(CONSTANTS.CLIENT_DISCONNECTED_TOPIC);
   }
 
   handleIncomingMessage(event) {
@@ -56,21 +62,21 @@ class Passenger {
   }
 
   sendBackHandshake() {
-    this.postMessageToHost(CONSTANTS.BACK_HANDSHAKE_TOPIC);
+    this.post(CONSTANTS.BACK_HANDSHAKE_TOPIC);
   }
 
   setHostAsConnected(message) {
     this.off(CONSTANTS.HANDSHAKE_TOPIC);
     this.host = utils.createHostFromMessage(message);
     this.sendBackHandshake();
-    this.deliverQueuedMessaged();
+    this.deliverQueuedMessages();
   }
 
   addMessageToQueue(message) {
     this.queue.push(message);
   }
 
-  deliverQueuedMessaged() {
+  deliverQueuedMessages() {
     this.queue.forEach(this.postMessage, this);
     this.queue.length = 0;
   }
