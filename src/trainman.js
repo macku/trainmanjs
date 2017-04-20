@@ -2,20 +2,24 @@ import * as CONSTANTS from './constants';
 import * as utils from './utils';
 
 class Trainman {
-  constructor(frame, config = CONSTANTS.DEFAULT_CONFIG) {
-    this.config = { ...CONSTANTS.DEFAULT_CONFIG, ...config };
+  constructor(frame = null, config = CONSTANTS.DEFAULT_TRAINMAN_CONFIG) {
+    this.config = { ...CONSTANTS.DEFAULT_TRAINMAN_CONFIG, ...config };
 
     this.intervals = {};
     this.clients = {};
     this.subjects = {};
     this.queue = [];
 
+    this.debug('Starting new Trainman instance');
+
     this.handleIncomingMessage = this.handleIncomingMessage.bind(this);
 
     this.addEventHandlers();
 
-    const frames = Array.isArray(frame) ? frame : [frame];
-    this.setClients(...frames);
+    if (frame !== null) {
+      const frames = Array.isArray(frame) ? frame : [frame];
+      this.setClients(...frames);
+    }
   }
 
   setClients(...frames) {
@@ -44,7 +48,9 @@ class Trainman {
     const client = this.createClient(frame);
 
     if (this.clients[client.clientId]) {
-      throw new TypeError(`Client with given id ${client.clientId} is already registered`);
+      /* eslint-disable no-console */
+      console.warn(`Client with given id ${client.clientId} is already registered`);
+      /* eslint-enalbe no-console */
     }
 
     this.clients[client.clientId] = client;
@@ -61,8 +67,12 @@ class Trainman {
     const { [topic]: listeners } = this.subjects;
 
     if (!Array.isArray(listeners)) {
+      this.debug(`Received message with "${topic}" topic but there are no listeners than can handle it`);
+
       return;
     }
+
+    this.debug(`Received message with "${topic}" topic`);
 
     listeners.forEach((listener) => {
       const { targetOrigin, callback } = listener;
@@ -81,10 +91,14 @@ class Trainman {
     const { frame, targetOrigin } = this.getClient(clientId);
     const message = utils.buildMessage(topic, data);
 
+    this.debug(`Sending message with "${topic}" topic to "${clientId}" client`);
+
     frame.contentWindow.postMessage(message, targetOrigin);
   }
 
   connectToClient(clientId, reconnect = false) {
+    this.debug(`${reconnect ? 'Restarting' : 'Starting'} handshake polling for "${clientId}" client...`);
+
     this.startHandshakePolling(clientId);
 
     this.on(clientId, CONSTANTS.BACK_HANDSHAKE_TOPIC, this.setClientAsConnected.bind(this, clientId));
@@ -95,7 +109,7 @@ class Trainman {
   }
 
   startHandshakePolling(clientId) {
-    this.intervals[clientId] = setInterval(this.sendHandshake.bind(this, clientId), this.config.HANDSHAKE_INTERVAL);
+    this.intervals[clientId] = setInterval(this.sendHandshake.bind(this, clientId), this.config.handshakeInterval);
   }
 
   sendHandshake(clientId) {
@@ -103,6 +117,8 @@ class Trainman {
   }
 
   setClientAsConnected(clientId) {
+    this.debug(`Client "${clientId}" was connected`);
+
     this.stopHandshakePooling(clientId);
     this.off(clientId, CONSTANTS.BACK_HANDSHAKE_TOPIC);
 
@@ -116,10 +132,15 @@ class Trainman {
     const client = this.getClient(clientId);
     client.connected = false;
 
+    this.debug(`Client ${clientId} was disconnected`);
+
     this.connectToClient(clientId, true);
   }
 
-  addMessageToQueue(clientId, message) {
+  addMessageToQueue(message) {
+    const { clientId } = message;
+    this.debug(`Adding message with "${message.topic}" topic to queue for "${clientId}" client`);
+
     this.queue[clientId] = this.queue[clientId] || [];
 
     const queue = this.queue[clientId];
@@ -130,9 +151,11 @@ class Trainman {
   deliverQueuedMessages(clientId) {
     const messages = this.queue[clientId];
 
-    if (!Array.isArray(messages) || !messages.length) {
+    if (!Array.isArray(messages) || messages.length < 1) {
       return;
     }
+
+    this.debug(`Delivering queued messages to "${clientId}" client`);
 
     messages.forEach((message) => {
       this.postMessage(message);
@@ -142,6 +165,10 @@ class Trainman {
   }
 
   getClient(clientId) {
+    if (!this.clients.hasOwnProperty(clientId)) {
+      console.warn(`Given "${clientId}" client is not registered`);
+    }
+
     return this.clients[clientId];
   }
 
@@ -151,7 +178,7 @@ class Trainman {
 
   post(clientId, topic, data) {
     if (!this.getClient(clientId)) {
-      throw new TypeError(`Given "${clientId}" client is not registered`);
+      return this;
     }
 
     const message = { clientId, topic, data };
@@ -174,11 +201,19 @@ class Trainman {
   }
 
   on(clientId, topic, callback) {
-    const { targetOrigin } = this.getClient(clientId);
+    const client = this.getClient(clientId);
+
+    if (!client) {
+      return this;
+    }
+
+    const { targetOrigin } = client;
     const listener = { targetOrigin, callback, clientId, topic };
 
     this.subjects[topic] = this.subjects[topic] || [];
     this.subjects[topic].push(listener);
+
+    this.debug(`Adding "${topic}" topic listener for "${clientId}" client`);
 
     return this;
   }
@@ -191,6 +226,8 @@ class Trainman {
     } else if (topic) {
       fn = this.offClientTopics;
     }
+
+    this.debug(`Removing "${topic}" topic listener for "${clientId}" client`);
 
     fn.call(this, clientId, topic, callback);
 
@@ -210,7 +247,7 @@ class Trainman {
   offClientTopics(clientId, topic) {
     let { [topic]: listeners } = this.subjects;
 
-    if (!Array.isArray(listeners) || !listeners.length) {
+    if (!Array.isArray(listeners) || listeners.length < 1) {
       return;
     }
 
@@ -224,7 +261,7 @@ class Trainman {
   offClientTopicCallback(clientId, topic, callback) {
     let { [topic]: listeners } = this.subjects;
 
-    if (!Array.isArray(listeners) || !listeners.length) {
+    if (!Array.isArray(listeners) || listeners.length < 1) {
       return;
     }
 
@@ -242,8 +279,20 @@ class Trainman {
       return;
     }
 
+    this.debug(`Handshake polling for "${clientId}" client was stopped`);
+
     clearTimeout(interval);
     delete this.intervals[clientId];
+  }
+
+  debug(message) {
+    const debugCallback = this.config.debugCallback;
+
+    if (!this.config.debug || (typeof debugCallback !== 'function')) {
+      return;
+    }
+
+    debugCallback(`Trainman: ${message}`);
   }
 }
 

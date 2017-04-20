@@ -2,10 +2,14 @@ import * as CONSTANTS from './constants';
 import * as utils from './utils';
 
 class Passenger {
-  constructor() {
+  constructor(config = CONSTANTS.DEFAULT_PASSENGER_CONFIG) {
+    this.config = { ...CONSTANTS.DEFAULT_PASSENGER_CONFIG, ...config };
+
     this.host = utils.createEmptyHost();
     this.subjects = {};
     this.queue = [];
+
+    this.debug('Starting new Passenger instance');
 
     this.handleIncomingMessage = this.handleIncomingMessage.bind(this);
     this.handleFrameUnload = this.handleFrameUnload.bind(this);
@@ -21,6 +25,8 @@ class Passenger {
   }
 
   handleFrameUnload() {
+    this.debug('Frame is unloading it-self');
+
     this.post(CONSTANTS.CLIENT_DISCONNECTED_TOPIC);
   }
 
@@ -29,8 +35,12 @@ class Passenger {
     const { [topic]: listeners } = this.subjects;
 
     if (!Array.isArray(listeners)) {
+      this.debug(`Received message from host with "${topic}" topic but there are no listeners than can handle it`);
+
       return;
     }
+
+    this.debug(`Received message from host with "${topic}" topic`);
 
     listeners.forEach((listener) => {
       if (!this.isMatchingOrigin(sourceOrigin, topic)) {
@@ -54,10 +64,14 @@ class Passenger {
     const { source, origin: targetOrigin } = this.host;
     const message = utils.buildMessage(topic, data);
 
+    this.debug(`Sending message to host with "${topic}" topic`);
+
     source.postMessage(message, targetOrigin);
   }
 
   waitForHandshake() {
+    this.debug('Waiting for host to send handshake...');
+
     this.on(CONSTANTS.HANDSHAKE_TOPIC, this.setHostAsConnected);
   }
 
@@ -66,6 +80,8 @@ class Passenger {
   }
 
   setHostAsConnected(message) {
+    this.debug('Host was connected');
+
     this.off(CONSTANTS.HANDSHAKE_TOPIC);
     this.host = utils.createHostFromMessage(message);
     this.sendBackHandshake();
@@ -73,10 +89,18 @@ class Passenger {
   }
 
   addMessageToQueue(message) {
+    this.debug(`Adding message with "${message.topic}" topic to queue`);
+
     this.queue.push(message);
   }
 
   deliverQueuedMessages() {
+    if (this.queue.length < 1) {
+      return;
+    }
+
+    this.debug('Delivering queued messages to host');
+
     this.queue.forEach(this.postMessage, this);
     this.queue.length = 0;
   }
@@ -109,11 +133,15 @@ class Passenger {
     this.subjects[topic] = this.subjects[topic] || [];
     this.subjects[topic].push(listener);
 
-    return () => this.off(topic, callback);
+    this.debug(`Adding "${topic}" topic listener`);
+
+    return this;
   }
 
   off(topic, callback) {
     const fn = callback ? this.offTopicCallback : this.offTopics;
+
+    this.debug(`Removing "${topic}" topic listener`);
 
     return fn.call(this, topic, callback);
   }
@@ -134,6 +162,16 @@ class Passenger {
     ));
 
     this.subjects[topic] = listeners;
+  }
+
+  debug(message) {
+    const debugCallback = this.config.debugCallback;
+
+    if (!this.config.debug || (typeof debugCallback !== 'function')) {
+      return;
+    }
+
+    debugCallback(`Passenger: ${message}`);
   }
 }
 

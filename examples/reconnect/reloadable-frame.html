@@ -16,11 +16,17 @@
 </p>
 
 <script src="https://unpkg.com/trainmanjs"></script>
+<!--<script src="../../lib/trainmanjs.js"></script>-->
 <script src="topics.js"></script>
 <script>
   (function(module) {
     const Passenger = module.Passenger;
-    const passenger = new Passenger();
+    const passenger = new Passenger({
+      debug: true,
+      debugCallback: msg => (
+        console.debug(`%c${msg}`, 'color: #0a0')
+        )
+    });
 
     let counter = 0;
 
@@ -37,9 +43,5 @@
     });
   })(trainmanjs);
 </script>
-</body>
-</html>
-
-
 </body>
 </html>

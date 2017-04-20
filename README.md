@@ -1,6 +1,6 @@
 [![version](https://img.shields.io/npm/v/trainmanjs.svg)](https://www.npmjs.com/package/trainmanjs)
-[![dependencies](https://img.shields.io/david/macku/trainmanjs.svg)](package.json)
-[![dev dependencies](https://img.shields.io/david/dev/macku/trainmanjs.svg)](package.json)
+[![dependencies](https://img.shields.io/david/macku/trainmanjs.svg)](https://david-dm.org/macku/trainmanjs)
+[![dev dependencies](https://img.shields.io/david/dev/macku/trainmanjs.svg)](https://david-dm.org/macku/trainmanjs?type=dev)
 
 # TrainmanJS
 
@@ -39,10 +39,10 @@ source: http://matrix.wikia.com/wiki/The_Trainman
    Post a message to all child frames at once. Don't need to specify an exact recipient. You can use the **'*'** symbol
    for sending a message to all of the connect children frames.
     
- - Log mode (upcoming)
-  
+ - Debug mode
+   
    Easily turn on and off logging mechanism. Thanks to that you can debug your code and application in a much more simple
-   way.
+   way. You can track and check whole Trainman and Passenger communication.
 
  - F2F (upcoming)
 
@@ -103,6 +103,6 @@ TBA
 1. [Check simple example](https://rawgit.com/macku/trainmanjs/master/examples/simple/index.html) how to use Trainman
 2. [Here you can find the source code](/examples/simple/) for the above example
 
-### Re-connection
+### Re-connection and Debug Mode
 1. [Reconnection example](https://rawgit.com/macku/trainmanjs/master/examples/reconnect/index.html)
 2. [Here you can find the source code](/examples/reconnect/) for the above example
