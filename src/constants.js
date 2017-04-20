@@ -1,5 +1,14 @@
-export const DEFAULT_CONFIG = {
-  HANDSHAKE_INTERVAL: 0.5 * 1000
+const noop = () => null;
+
+export const DEFAULT_TRAINMAN_CONFIG = {
+  handshakeInterval: 0.5 * 1000,
+  debug: false,
+  debugCallback: noop
+};
+
+export const DEFAULT_PASSENGER_CONFIG = {
+  debug: false,
+  debugCallback: noop
 };
 
 export const TOPIC_KEY = 'topic';
