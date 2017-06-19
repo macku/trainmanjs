@@ -34,7 +34,8 @@ export const retrieveMessageFromEvent = (event) => {
 
 export const buildMessage = (topic, data = null) => {
   const message = {
-    [CONSTANTS.TOPIC_KEY]: topic
+    [CONSTANTS.TOPIC_KEY]: topic,
+    [CONSTANTS.FINGERPRINT_KEY]: CONSTANTS.FINGERPRINT
   };
 
   if (data !== null) {
@@ -54,4 +55,10 @@ export const createHostFromMessage = (message) => {
   const { source, sourceOrigin: origin } = message;
 
   return { origin, source, connected: true };
+};
+
+export const isEventMessageSupported = (event) => {
+  const { data } = event;
+
+  return data[CONSTANTS.FINGERPRINT_KEY] === CONSTANTS.FINGERPRINT;
 };

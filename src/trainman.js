@@ -22,158 +22,10 @@ class Trainman {
     }
   }
 
-  setClients(...frames) {
-    Array.from(frames).map(frame => this.setClient(frame));
-  }
-
-  createClient(frame) {
-    if (!utils.isElAnIframe(frame)) {
-      throw new TypeError('Given frame is not an instance of the Iframe interface', frame);
-    }
-
-    const { src, id: clientId } = frame;
-    const targetOrigin = utils.getOriginFromUri(src);
-    const sourceOrigin = utils.getOrigin();
-
-    return {
-      clientId,
-      sourceOrigin,
-      targetOrigin,
-      frame,
-      connected: false
-    };
-  }
-
-  setClient(frame) {
-    const client = this.createClient(frame);
-
-    if (this.clients[client.clientId]) {
-      /* eslint-disable no-console */
-      console.warn(`Client with given id ${client.clientId} is already registered`);
-      /* eslint-enalbe no-console */
-    }
-
-    this.clients[client.clientId] = client;
-
-    this.connectToClient(client.clientId);
-  }
-
-  addEventHandlers() {
-    window.addEventListener(CONSTANTS.MESSAGE_EVENT_NAME, this.handleIncomingMessage);
-  }
-
-  handleIncomingMessage(event) {
-    const { topic, data, source, sourceOrigin } = utils.retrieveMessageFromEvent(event);
-    const { [topic]: listeners } = this.subjects;
-
-    if (!Array.isArray(listeners)) {
-      this.debug(`Received message with "${topic}" topic but there are no listeners than can handle it`);
-
-      return;
-    }
-
-    this.debug(`Received message with "${topic}" topic`);
-
-    listeners.forEach((listener) => {
-      const { targetOrigin, callback } = listener;
-
-      if (!utils.isMatchingOrigin(sourceOrigin, targetOrigin)) {
-        return;
-      }
-
-      const message = { topic, source, sourceOrigin, data };
-
-      callback(message);
-    });
-  }
-
-  postMessageToClient(clientId, topic, data) {
-    const { frame, targetOrigin } = this.getClient(clientId);
-    const message = utils.buildMessage(topic, data);
-
-    this.debug(`Sending message with "${topic}" topic to "${clientId}" client`);
-
-    frame.contentWindow.postMessage(message, targetOrigin);
-  }
-
-  connectToClient(clientId, reconnect = false) {
-    this.debug(`${reconnect ? 'Restarting' : 'Starting'} handshake polling for "${clientId}" client...`);
-
-    this.startHandshakePolling(clientId);
-
-    this.on(clientId, CONSTANTS.BACK_HANDSHAKE_TOPIC, this.setClientAsConnected.bind(this, clientId));
-
-    if (!reconnect) {
-      this.on(clientId, CONSTANTS.CLIENT_DISCONNECTED_TOPIC, this.setClientAsDisconnected.bind(this, clientId));
-    }
-  }
-
-  startHandshakePolling(clientId) {
-    this.intervals[clientId] = setInterval(this.sendHandshake.bind(this, clientId), this.config.handshakeInterval);
-  }
-
-  sendHandshake(clientId) {
-    this.postMessageToClient(clientId, CONSTANTS.HANDSHAKE_TOPIC);
-  }
-
-  setClientAsConnected(clientId) {
-    this.debug(`Client "${clientId}" was connected`);
-
-    this.stopHandshakePooling(clientId);
-    this.off(clientId, CONSTANTS.BACK_HANDSHAKE_TOPIC);
-
-    const client = this.getClient(clientId);
-    client.connected = true;
-
-    this.deliverQueuedMessages(clientId);
-  }
-
-  setClientAsDisconnected(clientId) {
-    const client = this.getClient(clientId);
-    client.connected = false;
-
-    this.debug(`Client ${clientId} was disconnected`);
-
-    this.connectToClient(clientId, true);
-  }
-
-  addMessageToQueue(message) {
-    const { clientId } = message;
-    this.debug(`Adding message with "${message.topic}" topic to queue for "${clientId}" client`);
-
-    this.queue[clientId] = this.queue[clientId] || [];
-
-    const queue = this.queue[clientId];
-
-    queue.push(message);
-  }
-
-  deliverQueuedMessages(clientId) {
-    const messages = this.queue[clientId];
-
-    if (!Array.isArray(messages) || messages.length < 1) {
-      return;
-    }
-
-    this.debug(`Delivering queued messages to "${clientId}" client`);
-
-    messages.forEach((message) => {
-      this.postMessage(message);
-    });
-
-    messages.length = 0;
-  }
-
-  getClient(clientId) {
-    if (!this.clients.hasOwnProperty(clientId)) {
-      console.warn(`Given "${clientId}" client is not registered`);
-    }
-
-    return this.clients[clientId];
-  }
-
   addClient(frame) {
     this.setClient(frame);
+
+    return this;
   }
 
   post(clientId, topic, data) {
@@ -187,24 +39,11 @@ class Trainman {
     return this;
   }
 
-  postMessage(message) {
-    const { clientId, topic, data } = message;
-    const client = this.getClient(clientId);
-
-    if (!utils.isClientConnected(client)) {
-      this.addMessageToQueue(message);
-
-      return;
-    }
-
-    this.postMessageToClient(clientId, topic, data);
-  }
-
   on(clientId, topic, callback) {
     const client = this.getClient(clientId);
 
     if (!client) {
-      return this;
+      return this; // TODO: Check this
     }
 
     const { targetOrigin } = client;
@@ -234,6 +73,223 @@ class Trainman {
     return this;
   }
 
+  /**
+   * @private
+   */
+  setClients(...frames) {
+    Array.from(frames).map(frame => this.setClient(frame));
+  }
+
+  /**
+   * @private
+   */
+  createClient(frame) {
+    if (!utils.isElAnIframe(frame)) {
+      throw new TypeError('Given frame is not an instance of the Iframe interface', frame);
+    }
+
+    const { src, id: clientId } = frame;
+    const targetOrigin = utils.getOriginFromUri(src);
+    const sourceOrigin = utils.getOrigin();
+
+    return {
+      clientId,
+      sourceOrigin,
+      targetOrigin,
+      frame,
+      connected: false
+    };
+  }
+
+  /**
+   * @private
+   */
+  setClient(frame) {
+    const client = this.createClient(frame);
+
+    if (this.clients[client.clientId]) {
+      /* eslint-disable no-console */
+      console.warn(`Client with given id ${client.clientId} is already registered`);
+      /* eslint-enable no-console */
+    }
+
+    this.clients[client.clientId] = client;
+
+    this.connectToClient(client.clientId);
+  }
+
+  /**
+   * @private
+   */
+  addEventHandlers() {
+    window.addEventListener(CONSTANTS.MESSAGE_EVENT_NAME, this.handleIncomingMessage);
+  }
+
+  /**
+   * @private
+   */
+  handleIncomingMessage(event) {
+    if (!utils.isEventMessageSupported(event)) {
+      return;
+    }
+
+    const { topic, data, source, sourceOrigin } = utils.retrieveMessageFromEvent(event);
+    const { [topic]: listeners } = this.subjects;
+
+    if (!Array.isArray(listeners)) {
+      this.debug(`Received message with "${topic}" topic but there are no listeners than can handle it`);
+
+      return;
+    }
+
+    this.debug(`Received message with "${topic}" topic`);
+
+    listeners.forEach((listener) => {
+      const { targetOrigin, callback } = listener;
+
+      if (!utils.isMatchingOrigin(sourceOrigin, targetOrigin)) {
+        return;
+      }
+
+      const message = { topic, source, sourceOrigin, data };
+
+      callback(message);
+    });
+  }
+
+  /**
+   * @private
+   */
+  postMessageToClient(clientId, topic, data) {
+    const { frame, targetOrigin } = this.getClient(clientId);
+    const message = utils.buildMessage(topic, data);
+
+    this.debug(`Sending message with "${topic}" topic to "${clientId}" client`);
+
+    frame.contentWindow.postMessage(message, targetOrigin);
+  }
+
+  /**
+   * @private
+   */
+  connectToClient(clientId, reconnect = false) {
+    this.debug(`${reconnect ? 'Restarting' : 'Starting'} handshake polling for "${clientId}" client...`);
+
+    this.startHandshakePolling(clientId);
+
+    this.on(clientId, CONSTANTS.BACK_HANDSHAKE_TOPIC, this.setClientAsConnected.bind(this, clientId));
+
+    if (!reconnect) {
+      this.on(clientId, CONSTANTS.CLIENT_DISCONNECTED_TOPIC, this.setClientAsDisconnected.bind(this, clientId));
+    }
+  }
+
+  /**
+   * @private
+   */
+  startHandshakePolling(clientId) {
+    this.intervals[clientId] = setInterval(this.sendHandshake.bind(this, clientId), this.config.handshakeInterval);
+  }
+
+  /**
+   * @private
+   */
+  sendHandshake(clientId) {
+    this.postMessageToClient(clientId, CONSTANTS.HANDSHAKE_TOPIC);
+  }
+
+  /**
+   * @private
+   */
+  setClientAsConnected(clientId) {
+    this.debug(`Client "${clientId}" was connected`);
+
+    this.stopHandshakePooling(clientId);
+    this.off(clientId, CONSTANTS.BACK_HANDSHAKE_TOPIC);
+
+    const client = this.getClient(clientId);
+    client.connected = true;
+
+    this.deliverQueuedMessages(clientId);
+  }
+
+  /**
+   * @private
+   */
+  setClientAsDisconnected(clientId) {
+    const client = this.getClient(clientId);
+    client.connected = false;
+
+    this.debug(`Client ${clientId} was disconnected`);
+
+    this.connectToClient(clientId, true);
+  }
+
+  /**
+   * @private
+   */
+  addMessageToQueue(message) {
+    const { clientId } = message;
+    this.debug(`Adding message with "${message.topic}" topic to queue for "${clientId}" client`);
+
+    this.queue[clientId] = this.queue[clientId] || [];
+
+    const queue = this.queue[clientId];
+
+    queue.push(message);
+  }
+
+  /**
+   * @private
+   */
+  deliverQueuedMessages(clientId) {
+    const messages = this.queue[clientId];
+
+    if (!Array.isArray(messages) || messages.length < 1) {
+      return;
+    }
+
+    this.debug(`Delivering queued messages to "${clientId}" client`);
+
+    messages.forEach((message) => {
+      this.postMessage(message);
+    });
+
+    messages.length = 0;
+  }
+
+  /**
+   * @private
+   */
+  getClient(clientId) {
+    if (!this.clients.hasOwnProperty(clientId)) {
+      /* eslint-disable no-console */
+      console.warn(`Given "${clientId}" client is not registered`);
+      /* eslint-enable no-console */
+    }
+
+    return this.clients[clientId];
+  }
+
+  /**
+   * @private
+   */
+  postMessage(message) {
+    const { clientId, topic, data } = message;
+    const client = this.getClient(clientId);
+
+    if (!utils.isClientConnected(client)) {
+      this.addMessageToQueue(message);
+
+      return;
+    }
+
+    this.postMessageToClient(clientId, topic, data);
+  }
+
+  /**
+   * @private
+   */
   offClient(clientId) {
     Object.entries(this.subjects)
       .map(([topic, listeners]) => (
@@ -244,6 +300,9 @@ class Trainman {
       });
   }
 
+  /**
+   * @private
+   */
   offClientTopics(clientId, topic) {
     let { [topic]: listeners } = this.subjects;
 
@@ -258,6 +317,9 @@ class Trainman {
     this.subjects[topic] = listeners;
   }
 
+  /**
+   * @private
+   */
   offClientTopicCallback(clientId, topic, callback) {
     let { [topic]: listeners } = this.subjects;
 
@@ -272,6 +334,9 @@ class Trainman {
     this.subjects[topic] = listeners;
   }
 
+  /**
+   * @private
+   */
   stopHandshakePooling(clientId) {
     const interval = this.intervals[clientId];
 
@@ -285,6 +350,9 @@ class Trainman {
     delete this.intervals[clientId];
   }
 
+  /**
+   * @private
+   */
   debug(message) {
     const debugCallback = this.config.debugCallback;
 

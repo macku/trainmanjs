@@ -75,14 +75,14 @@ import { Passenger } from 'trainmnanjs';
 
 ### Using CDN
 
-You can also use the **CDN** service ex. [unpkg.com](https://unpkg.com/trainmanjs@0.3.2) or [npm-cdn.herrokuapp.com](http://npm-cdn.herokuapp.com/trainmanjs@0.3.2/lib/trainmanjs.js)
+You can also use the **CDN** service ex. [unpkg.com](https://unpkg.com/trainmanjs@0.5.0) or [npm-cdn.herrokuapp.com](http://npm-cdn.herokuapp.com/trainmanjs@0.5.0/lib/trainmanjs.js)
 
 ```html
 <script src="https://unpkg.com/trainmanjs"></script>
 
 <!-- or -->
 
-<script src="http://npm-cdn.herokuapp.com/trainmanjs@0.3.2/lib/trainmanjs.js"></script>
+<script src="http://npm-cdn.herokuapp.com/trainmanjs@0.5.0/lib/trainmanjs.js"></script>
 ```
 
 Then you can access the **Trainman** and **Passenger** from the injected module:
