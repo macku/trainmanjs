@@ -1,6 +1,6 @@
 {
   "name": "trainmanjs",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "TrainmanJS - Cross-Origin Communication Library",
   "main": "lib/trainmanjs.js",
   "jsnext:main": "src/index.js",
