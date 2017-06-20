@@ -13,7 +13,7 @@ export const DEFAULT_PASSENGER_CONFIG = {
 
 export const TOPIC_KEY = 'topic';
 export const DATA_KEY = 'data';
-export const FINGERPRINT_KEY = 'data';
+export const FINGERPRINT_KEY = 'fingerprint';
 export const MESSAGE_EVENT_NAME = 'message';
 export const UNLOAD_EVENT_NAME = 'unload';
 
