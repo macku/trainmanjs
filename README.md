@@ -1,8 +1,11 @@
-[![version](https://img.shields.io/npm/v/trainmanjs.svg)](https://www.npmjs.com/package/trainmanjs)
-[![dependencies](https://img.shields.io/david/macku/trainmanjs.svg)](https://david-dm.org/macku/trainmanjs)
-[![dev dependencies](https://img.shields.io/david/dev/macku/trainmanjs.svg)](https://david-dm.org/macku/trainmanjs?type=dev)
-
 # TrainmanJS
+
+[![npm version](https://img.shields.io/npm/v/trainmanjs.svg)](https://www.npmjs.com/package/trainmanjs)
+[![npm dependencies](https://img.shields.io/david/macku/trainmanjs.svg)](https://david-dm.org/macku/trainmanjs)
+[![npm dev dependencies](https://img.shields.io/david/dev/macku/trainmanjs.svg)](https://david-dm.org/macku/trainmanjs?type=dev)
+[![Build Status](https://travis-ci.org/macku/trainmanjs.svg?branch=master)](https://travis-ci.org/macku/trainmanjs)
+[![Coverage Status](https://s3.amazonaws.com/assets.coveralls.io/badges/coveralls_100.svg)](https://coveralls.io/github/macku/trainmanjs?branch=master)
+[![Greenkeeper badge](https://badges.greenkeeper.io/macku/trainmanjs.svg)](https://greenkeeper.io/)
 
 TrainmanJS is [Cross-Origin Communication Library](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing). It's a
 wrapper for the native [`postMessage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) API.
