@@ -46,7 +46,7 @@
     "eslint-plugin-promise": "^3.5.0",
     "eslint-plugin-require-path-exists": "^1.1.7",
     "eslint-plugin-standard": "^3.0.1",
-    "webpack": "^2.4.1"
+    "webpack": "^4.0.0"
   },
   "engines": {
     "node": ">=6.5",
